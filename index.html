@@ -46,16 +46,20 @@
     let supporters = [];
     let current = 0;
 
-    // Fetch data from Google Sheets
     async function fetchData() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        supporters = data.supporters || [];
-        current = data.total || 0;
+
+        supporters = Array.isArray(data.supporters) ? data.supporters : [];
+        current = Number(data.total) || 0;
+
         updateUI();
       } catch (err) {
         console.error('Error fetching data:', err);
+        supporters = [];
+        current = 0;
+        updateUI();
       }
     }
 
@@ -66,11 +70,17 @@
 
       const list = document.getElementById('supporters');
       list.innerHTML = '';
-      supporters.forEach(s => {
+      if (supporters.length === 0) {
         const li = document.createElement('li');
-        li.textContent = `${s.name} — $${s.amount}`;
+        li.textContent = 'No supporters yet.';
         list.appendChild(li);
-      });
+      } else {
+        supporters.forEach(s => {
+          const li = document.createElement('li');
+          li.textContent = `${s.name} — $${s.amount}`;
+          list.appendChild(li);
+        });
+      }
     }
 
     async function addSupporter() {
@@ -85,7 +95,6 @@
           body: JSON.stringify({ name, amount }),
         });
 
-        // Update the local view immediately
         supporters.push({ name, amount });
         current += amount;
         updateUI();
@@ -97,8 +106,7 @@
       }
     }
 
-    // Fetch data on page load
-    fetchData();
+    window.addEventListener('DOMContentLoaded', fetchData);
   </script>
 </body>
 </html>
