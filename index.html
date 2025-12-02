@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fundraising Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; }
+    .progress-wrapper { margin: 20px 0; }
+    .progress-bar-bg { width: 100%; background: #e0e0e0; border-radius: 20px; overflow: hidden; }
+    .progress-bar { height: 24px; width: 0%; background: #4CAF50; transition: width 0.5s; }
+    #supporters { margin-top: 20px; }
+    li { padding: 6px 0; border-bottom: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fundraising Progress</h1>
+
+    <h3>Goal: $<span id="goal">5000</span></h3>
+    <h3>Current: $<span id="current">0</span></h3>
+
+    <div class="progress-wrapper">
+      <div class="progress-bar-bg">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <h2>Supporters</h2>
+    <ul id="supporters"></ul>
+
+    <h3>Add Supporter</h3>
+    <input type="text" id="nameInput" placeholder="Name" />
+    <input type="number" id="amountInput" placeholder="Amount" />
+    <button onclick="addSupporter()">Add</button>
+  </div>
+
+  <script>
+    let goal = 5000;
+    let current = 0;
+    const supporters = [];
+
+    function updateUI() {
+      document.getElementById('current').textContent = current;
+
+      const pct = Math.min((current / goal) * 100, 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+
+      const list = document.getElementById('supporters');
+      list.innerHTML = '';
+      supporters.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = `${s.name} — $${s.amount}`;
+        list.appendChild(li);
+      });
+    }
+
+    function addSupporter() {
+      const name = document.getElementById('nameInput').value.trim();
+      const amount = Number(document.getElementById('amountInput').value);
+
+      if (!name || !amount) return;
+
+      supporters.push({ name, amount });
+      current += amount;
+
+      document.getElementById('nameInput').value = '';
+      document.getElementById('amountInput').value = '';
+
+      updateUI();
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
