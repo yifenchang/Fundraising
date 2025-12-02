@@ -28,4 +28,77 @@
       <div class="progress-bar-bg">
         <div class="progress-bar" id="progressBar"></div>
       </div>
-    </
+    </div>
+
+    <h2>Supporters</h2>
+    <ul id="supporters"></ul>
+
+    <h3>Add Supporter</h3>
+    <input type="text" id="nameInput" placeholder="Name" />
+    <input type="number" id="amountInput" placeholder="Amount" />
+    <button onclick="addSupporter()">Add</button>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxm47dVmblsFlwvtY4eELkftRhdJy8AK-S44pXMThOM57DWwxmUBR6UVTwE9en9dgSEIQ/exec';
+    const goal = 5000;
+
+    let supporters = [];
+    let current = 0;
+
+    // Fetch data from Google Sheets
+    async function fetchData() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        supporters = data.supporters || [];
+        current = data.total || 0;
+        updateUI();
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('current').textContent = current;
+      const pct = Math.min((current / goal) * 100, 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+
+      const list = document.getElementById('supporters');
+      list.innerHTML = '';
+      supporters.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = `${s.name} — $${s.amount}`;
+        list.appendChild(li);
+      });
+    }
+
+    async function addSupporter() {
+      const name = document.getElementById('nameInput').value.trim();
+      const amount = Number(document.getElementById('amountInput').value);
+
+      if (!name || !amount) return alert('Please enter name and amount.');
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ name, amount }),
+        });
+
+        // Update the local view immediately
+        supporters.push({ name, amount });
+        current += amount;
+        updateUI();
+
+        document.getElementById('nameInput').value = '';
+        document.getElementById('amountInput').value = '';
+      } catch (err) {
+        console.error('Error submitting supporter:', err);
+      }
+    }
+
+    // Fetch data on page load
+    fetchData();
+  </script>
+</body>
+</html>
